@@ -7,13 +7,22 @@ export default function Home(props) {
   return <div>{message}</div>;
 }
 
-export const getServerSideProps = async ({ req }) => {
-  const SSR = withSSRContext({ req });
+export const getServerSideProps = async ({req}) => {
+  const SSR = withSSRContext({req});
+  
+  // Set the headers for the API call here instead
+  const myInit = {
+    headers: {
+      Authorization: `Bearer ${(await SSR.Auth.currentSession()).getIdToken().getJwtToken()}`
+    }
+  };
 
-  // This does not work, it returns no current user
-  const payload = await SSR.API.get("API", "hello", {});
+  // This should now work when passing the headers in `myInit` above
+  const payload = await SSR.API.get("API", "/hello", myInit);
+
+  console.log(payload);
 
   return {
-    props: { message: payload.message },
+    props: { message: JSON.stringify(payload) },
   };
 };
